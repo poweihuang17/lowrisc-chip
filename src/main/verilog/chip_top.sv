@@ -79,11 +79,71 @@ module chip_top
    inout [3:0]   flash_io,
 `endif
 
+  //! DIP switch.
+input [3:0] i_dip,
+  //! LEDs.
+output [7:0] o_led,
+  //! Ethernet MAC PHY interface signals
+output  o_erefclk     , // RMII clock out
+input  i_gmiiclk_p    , // GMII clock in
+input  i_gmiiclk_n    ,
+output  o_egtx_clk    ,
+input  i_etx_clk      ,
+input  i_erx_clk      ,
+input [3:0] i_erxd    ,
+input  i_erx_dv       ,
+input  i_erx_er       ,
+input  i_erx_col      ,
+input  i_erx_crs      ,
+input  i_emdint       ,
+output [3:0] o_etxd   ,
+output  o_etx_en      ,
+output  o_etx_er      ,
+output  o_emdc        ,
+inout   io_emdio   ,
+output  o_erstn    ,   
+   
    // clock and reset
    input         clk_p,
    input         clk_n,
    input         rst_top
    );
+
+logic mig_sys_clk, clk_locked;
+   
+rocket_soc eth0 
+( 
+  //! Input reset. Active High. Usually assigned to button "Center".
+  .i_rst       (~rst_top),
+  .wPllLocked  (clk_locked),
+  //! Differential clock (LVDS) positive signal
+  .i_clk50     (i_clk50),
+  //! Differential clock (LVDS) negative signal
+  .i_clk50_quad(i_clk50_quad),
+  //! DIP switch
+  .i_dip      (i_dip),
+  //! LEDs
+  .o_led      (o_led),
+  //! Ethernet MAC PHY interface signal
+  .o_erefclk     (o_erefclk)      , // RMII clock out
+  .i_gmiiclk_p   (i_gmiiclk_p)     , // GMII clock in
+  .i_gmiiclk_n     (i_gmiiclk_n     ),
+  .o_egtx_clk     (o_egtx_clk     ),
+  .i_etx_clk       (i_etx_clk       ),
+  .i_erx_clk       (i_erx_clk       ),
+  .i_erxd          (i_erxd),
+  .i_erx_dv        (i_erx_dv        ),
+  .i_erx_er        (i_erx_er        ),
+  .i_erx_col       (i_erx_col       ),
+  .i_erx_crs       (i_erx_crs       ),
+  .i_emdint        (i_emdint        ),
+  .o_etxd         (o_etxd),
+  .o_etx_en       (o_etx_en       ),
+  .o_etx_er       (o_etx_er       ),
+  .o_emdc         (o_emdc         ),
+  .io_emdio      (io_emdio    ),
+  .o_erstn       (o_erstn       ) 
+);
 
    genvar        i;
 
@@ -211,11 +271,13 @@ module chip_top
 
  `ifdef NEXYS4_COMMON
    //clock generator
-   logic mig_sys_clk, clk_locked;
    clk_wiz_0 clk_gen
      (
       .clk_in1     ( clk_p         ), // 100 MHz onboard
       .clk_out1    ( mig_sys_clk   ), // 200 MHz
+      .clk_out2    ( adc_clk       ), // 40 MHz
+      .clk_out3    ( i_clk50       ), // 50 MHz
+      .clk_out4    ( i_clk50_quad  ), // 50 MHz
       .resetn      ( rst_top       ),
       .locked      ( clk_locked    )
       );
