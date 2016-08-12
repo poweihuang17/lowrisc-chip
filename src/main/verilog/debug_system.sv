@@ -12,11 +12,14 @@ module debug_system
     parameter MAM_MEM_SIZE1  = 'h8000000,
     parameter MAM_ADDR_WIDTH = 64)
   (
-   input                        clk, rstn,
-   
+   input                        clk, clk_io, rstn,
+`ifdef ETH_DEBUG
+   input [31:0]                 i_glip,
+   output [31:0]                o_glip,
+`else   
    input                        rx,
    output                       tx,
-
+`endif
    output                       uart_irq,
 
    input [12:0]                 uart_ar_addr,
@@ -89,9 +92,21 @@ module debug_system
    assign fifo_out_valid = fifo_out.valid;
    assign fifo_out.ready = fifo_out_ready;
 
-   glip_uart_toplevel
-     #(.WIDTH(16), .BAUD(3000000), .FREQ(25000000))
-   u_glip(.clk_io    (clk),
+`ifdef ETH_DEBUG
+   glip_eth_toplevel u_glip(
+          //! GLIP outputs
+          .i_glip          (i_glip),
+          //! GLIP outputs
+          .o_glip          (o_glip),
+          .clk_io    (clk_io),
+`else
+   glip_uart_toplevel #(.WIDTH(16), .BAUD(3000000), .FREQ(25000000)) u_glip(
+          .uart_rx (rx),
+          .uart_tx (tx),
+          .uart_cts (0),
+          .uart_rts (),
+          .clk_io    (clk),
+`endif
           .clk_logic (clk),
           .rst       (rst),
           .logic_rst (logic_rst),
@@ -102,10 +117,6 @@ module debug_system
           .fifo_out_data  (fifo_out_data[15:0]),
           .fifo_out_valid (fifo_out_valid),
           .fifo_out_ready (fifo_out_ready),
-          .uart_rx (rx),
-          .uart_tx (tx),
-          .uart_cts (0),
-          .uart_rts (),
           .error ());
 `else // !`ifdef FPGA
    

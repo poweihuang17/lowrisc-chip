@@ -79,8 +79,6 @@ module chip_top
    inout [3:0]   flash_io,
 `endif
 
-  //! DIP switch.
-input [3:0] i_dip,
   //! LEDs.
 output [7:0] o_led,
   //! Ethernet MAC PHY interface signals
@@ -110,6 +108,9 @@ output  o_erstn    ,
    );
 
 logic mig_sys_clk, clk_locked;
+logic [31:0] glip_from_eth, glip_to_eth;
+
+assign o_led = glip_from_eth[7:0];
    
 rocket_soc eth0 
 ( 
@@ -120,10 +121,10 @@ rocket_soc eth0
   .i_clk50     (i_clk50),
   //! Differential clock (LVDS) negative signal
   .i_clk50_quad(i_clk50_quad),
-  //! DIP switch
-  .i_dip      (i_dip),
-  //! LEDs
-  .o_led      (o_led),
+  //! GLIP outputs
+  .i_glip      (glip_to_eth),
+  //! GLIP outputs
+  .o_glip      (glip_from_eth),
   //! Ethernet MAC PHY interface signal
   .o_erefclk     (o_erefclk)      , // RMII clock out
   .i_gmiiclk_p   (i_gmiiclk_p)     , // GMII clock in
@@ -786,6 +787,16 @@ rocket_soc eth0
    u_debug_system
      (
       .*,
+`ifdef ETH_DEBUG
+      //! GLIP outputs
+      .i_glip          (glip_from_eth           ),
+      //! GLIP outputs
+      .o_glip          (glip_to_eth             ),
+      .clk_io          (i_clk50                 ),
+`else
+      .rx              ( rxd                    ),
+      .tx              ( txd                    ),
+`endif
       .uart_irq        ( uart_irq               ),
       .uart_ar_addr    ( io_uart_lite.ar_addr   ),
       .uart_ar_ready   ( io_uart_lite.ar_ready  ),
@@ -803,8 +814,6 @@ rocket_soc eth0
       .uart_w_data     ( io_uart_lite.w_data    ),
       .uart_w_ready    ( io_uart_lite.w_ready   ),
       .uart_w_valid    ( io_uart_lite.w_valid   ),
-      .rx              ( rxd                    ),
-      .tx              ( txd                    ),
       .sys_rst         ( sys_rst                ),
       .cpu_rst         ( cpu_rst                ),
       .ring_out        ( debug_ring_start       ),
