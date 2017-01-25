@@ -34,3 +34,6 @@
 [submodule "opensocdebug/software"]
 	path = opensocdebug/software
 	url = https://github.com/opensocdebug/software
+[submodule "minion_subsystem"]
+	path = minion_subsystem
+	url = ./minion_subsystem
