@@ -34,3 +34,6 @@
 [submodule "minion_subsystem"]
 	path = minion_subsystem
 	url =  https://github.com/lowRISC/minion_subsystem.git
+[submodule "riscv-tools"]
+	path = riscv-tools
+	url = ./riscv-tools/
