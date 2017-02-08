@@ -74,6 +74,7 @@ module chip_top
 `endif
 
    output [7:0] o_led,
+   input  [3:0] i_dip,
    output wire 	     sd_sclk,
    input wire        sd_detect,
    inout wire [3:0]  sd_dat,
@@ -1085,10 +1086,11 @@ module chip_top
          .sd_detect(sd_detect),
          .sd_dat(sd_dat),
          .sd_cmd(sd_cmd),
-         .from_dip(16'b0),
+         .from_dip({12'b0,i_dip}),
          .to_led(o_led),
          .rstn(clk_locked),
-	 .*
+         .clk_200MHz(mig_sys_clk),
+	     .*
         );
    
 endmodule // chip_top
