@@ -81,6 +81,26 @@ module chip_top
    inout wire        sd_cmd,
    output reg        sd_reset,
 
+// push button array
+input GPIO_SW_C,
+input GPIO_SW_W,
+input GPIO_SW_E,
+input GPIO_SW_N,
+input GPIO_SW_S,
+//keyboard
+inout PS2_CLK,
+inout PS2_DATA,
+
+  // display
+output           VGA_HS_O,
+output           VGA_VS_O,
+output  [3:0]    VGA_RED_O,
+output  [3:0]    VGA_BLUE_O,
+output  [3:0]    VGA_GREEN_O,
+output [6:0]SEG,
+output [7:0]AN,
+output DP,
+
    // clock and reset
    input         clk_p,
    input         clk_n,
@@ -229,7 +249,7 @@ module chip_top
 
  `ifdef NEXYS4_COMMON
    //clock generator
-   logic mig_sys_clk, clk_locked;
+   logic mig_sys_clk, clk_locked, clk_pixel;
    logic clk_io_uart; // UART IO clock for debug
 
    clk_wiz_0 clk_gen
@@ -238,6 +258,7 @@ module chip_top
       .clk_out1    ( mig_sys_clk   ), // 200 MHz
       .clk_io_uart ( clk_io_uart   ), // 60 MHz
       .clk_msoc    ( clk_msoc      ), // 40 MHz
+      .clk_pixel   ( clk_pixel     ), // 120 MHz
       .resetn      ( rst_top       ),
       .locked      ( clk_locked    )
       );
@@ -1090,6 +1111,7 @@ module chip_top
          .to_led(o_led),
          .rstn(clk_locked),
          .clk_200MHz(mig_sys_clk),
+         .pxl_clk(clk_pixel),
 	     .*
         );
    
